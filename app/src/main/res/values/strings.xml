@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">MoneyCompose</string>
+
+    <!--Screen Home !-->
+    <string name="title_top_bar_screen_home">Home</string>
+
+    <!--Screen Close Month !-->
+    <string name="title_top_bar_screen_month">Cerrar mes</string>
+    <string name="title_screen_month">Finalizar mes actual</string>
+    <string name="body_screen_month">Estás por finalizar el mes actual. Esta acción servirá para guardar el mes actual para futuras referencias.</string>
+    <string name="footer_screen_month">Total gastado</string>
+
+    <!--Screen Export Report !-->
+    <string name="title_top_bar_export_report">Exportar PDF</string>
+    <string name="title_screen_export_report">Seleccionar Mes</string>
+    <string name="body_screen_export_report">Reportar Detalles</string>
+    <string name="footer_screen_export_report">File Format</string>
+    <string name="item_screen_export_report">PDF</string>
+
+    <!--Screen History !-->
+    <string name="title_top_bar_history">Historial</string>
+    <string name="title_screen_history">No hay meses cerrados</string>
+
+    <!--Screen Saving !-->
+    <string name="title_top_bar_saving">Ingresos</string>
+    <string name="title_screen_saving">Total Ahorros</string>
+    <string name="button_screen_saving">Guardar Ingreso</string>
+
+    <!--Screen Home !-->
+    <string name="title_top_bar_home">Mis Gastos</string>
+    <string name="title_screen_home_empty_spent">No hay gastos registrados</string>
+    <string name="title_drawer">Bienvenido</string>
+
+    <!--Dialog Date !-->
+    <string name="button_dialog_date_confirm">Confirmar</string>
+
+    <!--Dialog Add Spent !-->
+    <string name="title_dialog_add_spent">Añadir Gasto</string>
+    <string name="label_dialog_add_spent_description">Descripción</string>
+    <string name="label_dialog_add_spent_date">Fecha</string>
+    <string name="label_dialog_add_spent_price">Precio</string>
+    <string name="button_dialog_add_spent_cancel">Cancelar</string>
+    <string name="button_dialog_add_spent_save">Guardar</string>
+    
+</resources>
