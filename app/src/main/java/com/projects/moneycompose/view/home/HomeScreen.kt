@@ -1,6 +1,5 @@
 package com.projects.moneycompose.view.home
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -60,6 +59,44 @@ fun HomeScreen(
     var descriptionSpent by remember { mutableStateOf("") }
     var dateSpent by remember { mutableStateOf("") }
     var priceSpent by remember { mutableStateOf("") }
+    var descriptionUpdateSpent by remember { mutableStateOf("") }
+    var dateUpdateSpent by remember { mutableStateOf("") }
+    var priceUpdateSpent by remember { mutableStateOf("") }
+    var isUpdateSpent by remember { mutableStateOf(false) }
+    var idSpent by remember { mutableStateOf(0) }
+
+    if (isUpdateSpent) {
+        DialogAddSpend(
+            showDialog = true,
+            onDismissDialog = {
+                isUpdateSpent = false
+            },
+            onSaveSpent = {
+                if (descriptionUpdateSpent.isNotEmpty() && dateUpdateSpent.isNotEmpty() && priceUpdateSpent.isNotEmpty()) {
+                    baseViewModel.onEvent(
+                        MoneyEvent.EditSpent(
+                            SpentEntity(
+                                id = idSpent,
+                                description = descriptionUpdateSpent,
+                                date = dateUpdateSpent,
+                                money = priceUpdateSpent.toDouble()
+                            )
+                        )
+                    )
+                }
+                isUpdateSpent = false
+            },
+            descriptionSpent = descriptionUpdateSpent,
+            onChangeDescription = {
+                descriptionUpdateSpent = it
+            },
+            dateSpent = dateUpdateSpent,
+            onChangeDate = { dateUpdateSpent = it },
+            priceSpent = priceUpdateSpent,
+            onChangePrice = { priceUpdateSpent = it },
+            onShowCalendar = { showDialogCalendar = true }
+        )
+    }
 
     DialogAddSpend(
         showDialog = showDialog,
@@ -101,7 +138,7 @@ fun HomeScreen(
         showDateDialog = showDialogCalendar,
         onDismissDialog = { showDialogCalendar = false },
         onSelectedDate = { date ->
-            dateSpent = date
+            if (isUpdateSpent) dateUpdateSpent = date else dateSpent = date
             showDialogCalendar = false
         }
     )
@@ -131,7 +168,13 @@ fun HomeScreen(
             items(uiState.spends) { itemSpent ->
                 ItemSpent(
                     itemSpent = itemSpent,
-                    onEditSpent = { },
+                    onEditSpent = {
+                        isUpdateSpent = true
+                        idSpent = itemSpent.id
+                        descriptionUpdateSpent = itemSpent.description
+                        dateUpdateSpent = itemSpent.date
+                        priceUpdateSpent = itemSpent.money.toString()
+                    },
                     onDeleteSpent = {
                         baseViewModel.onEvent(
                             MoneyEvent.DeleteSpent(
@@ -184,16 +227,13 @@ fun ItemSpent(
         itemSpent.money.let { numberFormat.format(it) } ?: ""
     }
 
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
             TextCompose(text = itemSpent.description)
             TextCompose(text = itemSpent.date)
         }
@@ -211,7 +251,11 @@ fun ItemSpent(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Icon(imageVector = Icons.Default.Edit, contentDescription = "edit_spent", tint = MaterialTheme.colorScheme.secondary)
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "edit_spent",
+                    tint = MaterialTheme.colorScheme.secondary
+                )
             }
             Spacer(Modifier.width(12.dp))
             IconButton(
@@ -220,7 +264,11 @@ fun ItemSpent(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "delete_spent", tint = MaterialTheme.colorScheme.secondary)
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "delete_spent",
+                    tint = MaterialTheme.colorScheme.secondary
+                )
             }
         }
     }
