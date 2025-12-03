@@ -1,18 +1,9 @@
 package com.projects.moneycompose.view.core.navigation
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-object Home
-
-@Serializable
-object Saving
-
-@Serializable
-object CloseMonth
-
-@Serializable
-object History
-
-@Serializable
-object ExportReport
+sealed class Screens(val route: String) {
+    object Home: Screens("home")
+    object Saving: Screens("saving")
+    object CloseMonth: Screens("close_month")
+    object History: Screens("history")
+    object ExportReport: Screens("export_route")
+}
