@@ -33,7 +33,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SavingScreen(
-    innerPadding1: PaddingValues
+    innerPadding: PaddingValues
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -55,7 +55,7 @@ fun SavingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding1)
+            .padding(innerPadding)
             .padding(horizontal = 14.dp)
     ) {
         TextCompose(

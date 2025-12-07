@@ -43,7 +43,7 @@ import java.util.Locale
 fun CloseMonthScreen(
     closeMonthViewModel: BaseViewModel,
     onNavigateBack: () -> Unit,
-    innerPadding1: PaddingValues
+    innerPadding: PaddingValues
 ) {
     val listSpent by closeMonthViewModel.homeUiState.collectAsStateWithLifecycle()
     val currentDate = LocalDate.now()
@@ -77,7 +77,7 @@ fun CloseMonthScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding1)
+            .padding(innerPadding)
             .padding(horizontal = 14.dp)
     ) {
         TextCompose(
