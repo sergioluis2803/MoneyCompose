@@ -1,9 +1,21 @@
 package com.projects.moneycompose.view.core.navigation
 
-sealed class Screens(val route: String) {
-    object Home: Screens("home")
-    object Saving: Screens("saving")
-    object CloseMonth: Screens("close_month")
-    object History: Screens("history")
-    object ExportReport: Screens("export_route")
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
+
+sealed class Screens() : NavKey {
+    @Serializable
+    data object Home : Screens()
+
+    @Serializable
+    object Saving : Screens()
+
+    @Serializable
+    object CloseMonth : Screens()
+
+    @Serializable
+    object History : Screens()
+
+    @Serializable
+    object ExportReport : Screens()
 }

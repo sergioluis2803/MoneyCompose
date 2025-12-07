@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.projects.moneycompose.R
 import com.projects.moneycompose.domain.entity.MonthEntity
@@ -31,8 +30,8 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    historyViewModel: BaseViewModel = hiltViewModel(),
-    innerPadding1: PaddingValues
+    historyViewModel: BaseViewModel,
+    innerPadding: PaddingValues
 ) {
     val uiState by historyViewModel.uiHistoryState.collectAsStateWithLifecycle()
 
@@ -40,7 +39,7 @@ fun HistoryScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding1),
+                .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
             TextCompose(
@@ -53,7 +52,7 @@ fun HistoryScreen(
     } else {
         LazyColumn(
             modifier = Modifier
-                .padding(innerPadding1)
+                .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
             items(uiState.history) { historySpent ->

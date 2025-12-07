@@ -33,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.projects.moneycompose.R
 import com.projects.moneycompose.view.core.components.ButtonCompose
 import com.projects.moneycompose.view.core.components.TextCompose
@@ -46,8 +45,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportReportScreen(
-    exportViewModel: BaseViewModel = hiltViewModel(),
-    innerPadding1: PaddingValues
+    exportViewModel: BaseViewModel,
+    innerPadding: PaddingValues
 ) {
     val context = LocalContext.current
     var selectedMonth by remember { mutableStateOf("Julio") }
@@ -55,7 +54,7 @@ fun ExportReportScreen(
 
     Column(
         modifier = Modifier
-            .padding(innerPadding1)
+            .padding(innerPadding)
             .padding(horizontal = 16.dp)
     ) {
         TextCompose(

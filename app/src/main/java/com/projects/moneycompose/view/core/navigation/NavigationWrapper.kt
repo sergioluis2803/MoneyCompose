@@ -36,11 +36,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.projects.moneycompose.R
 import com.projects.moneycompose.view.BaseViewModel
 import com.projects.moneycompose.view.closeMonth.CloseMonthScreen
@@ -56,8 +58,7 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun NavigationWrapper() {
-
-    val navController = rememberNavController()
+    val navBackStack = rememberNavBackStack(Screens.Home)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -65,7 +66,6 @@ fun NavigationWrapper() {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
     var showDialog by remember { mutableStateOf(false) }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -75,20 +75,16 @@ fun NavigationWrapper() {
                 selectedIndex = selectedIndex,
                 onItemSelected = { index ->
                     selectedIndex = index
-                    scope.launch { drawerState.close() }
-
                     when (index) {
-                        0 -> navController.navigateSafe(Screens.Home.route){
-                            popUpTo(Screens.Home.route) { inclusive = false }
-                        }
-                        1 -> navController.navigateSafe(Screens.CloseMonth.route)
-                        2 -> navController.navigateSafe(Screens.Saving.route)
-                        3 -> navController.navigateSafe(Screens.ExportReport.route)
-                        4 -> navController.navigateSafe(Screens.History.route)
+                        0 -> navBackStack.navigateTo(Screens.Home)
+                        1 -> navBackStack.navigateTo(Screens.CloseMonth)
+                        2 -> navBackStack.navigateTo(Screens.Saving)
+                        3 -> navBackStack.navigateTo(Screens.ExportReport)
+                        4 -> navBackStack.navigateTo(Screens.History)
                     }
+                    scope.launch { drawerState.close() }
                 }
             )
-
         }
     ) {
         Scaffold(
@@ -98,7 +94,7 @@ fun NavigationWrapper() {
                 })
             },
             floatingActionButton = {
-                if (navBackStackEntry?.destination?.route == Screens.Home.route) {
+                if (navBackStack.screenIsHome()) {
                     FloatingActionButton(
                         onClick = { showDialog = true },
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -109,60 +105,93 @@ fun NavigationWrapper() {
                 }
             }
         ) { innerPadding ->
-
             NavigationGraph(
-                navController = navController,
+                backStack = navBackStack,
                 innerPadding = innerPadding,
                 showDialog = showDialog,
                 onDismissDialog = { showDialog = false }
             )
         }
     }
-
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun NavigationGraph(
-    navController: NavHostController,
+    backStack: NavBackStack<NavKey>,
     innerPadding: PaddingValues,
     showDialog: Boolean,
     onDismissDialog: () -> Unit
 ) {
-    NavHost(navController = navController, startDestination = Screens.Home.route) {
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.back() },
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Screens.Home> { key ->
+                val homeViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(key)
+                    }
+                )
 
-        composable(Screens.Home.route) { entry ->
-            val baseViewModel: BaseViewModel = hiltViewModel(entry)
-            HomeScreen(
-                baseViewModel = baseViewModel,
-                innerPadding = innerPadding,
-                showDialog = showDialog,
-                onDismissDialog = onDismissDialog
-            )
-        }
+                HomeScreen(
+                    baseViewModel = homeViewModel,
+                    innerPadding = innerPadding,
+                    showDialog = showDialog,
+                    onDismissDialog = onDismissDialog
+                )
+            }
 
-        composable(Screens.Saving.route) {
-            SavingScreen(innerPadding)
-        }
+            entry<Screens.Saving> {
+                SavingScreen(innerPadding)
+            }
 
-        composable(Screens.CloseMonth.route) { entry ->
-            val parent = remember(entry) { navController.getBackStackEntry(Screens.Home.route) }
-            val vm: BaseViewModel = hiltViewModel(parent)
-            CloseMonthScreen(
-                closeMonthViewModel = vm,
-                onNavigateBack = { navController.navigateSafe(Screens.Home.route) },
-                innerPadding1 = innerPadding
-            )
-        }
+            entry<Screens.CloseMonth> { key ->
+                val closeMonthViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(key)
+                    }
+                )
 
-        composable(Screens.History.route) {
-            HistoryScreen(innerPadding1 = innerPadding)
-        }
+                CloseMonthScreen(
+                    closeMonthViewModel = closeMonthViewModel,
+                    onNavigateBack = { backStack.navigateTo(Screens.Home) },
+                    innerPadding = innerPadding
+                )
 
-        composable(Screens.ExportReport.route) {
-            ExportReportScreen(innerPadding1 = innerPadding)
+            }
+
+            entry<Screens.History> { key ->
+                val historyViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(key)
+                    }
+                )
+
+                HistoryScreen(
+                    historyViewModel = historyViewModel,
+                    innerPadding = innerPadding
+                )
+            }
+
+            entry<Screens.ExportReport> { key ->
+                val exportReportViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(key)
+                    }
+                )
+
+                ExportReportScreen(
+                    exportViewModel = exportReportViewModel,
+                    innerPadding = innerPadding
+                )
+            }
         }
-    }
+    )
 }
 
 @Composable

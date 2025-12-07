@@ -18,7 +18,11 @@ import com.projects.moneycompose.domain.entity.ExportEntity
 import com.projects.moneycompose.domain.entity.MonthEntity
 import com.projects.moneycompose.domain.entity.SpentEntity
 import com.projects.moneycompose.domain.use_case.MoneyUseCases
+import com.projects.moneycompose.view.core.navigation.Screens
 import com.projects.moneycompose.view.core.util.MoneyEvent
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,12 +30,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class BaseViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = BaseViewModel.Factory::class)
+class BaseViewModel @AssistedInject constructor(
+    @Assisted val navKey: Screens,
     private val moneyUseCases: MoneyUseCases
 ): ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(navKey: Screens): BaseViewModel
+    }
 
     private val _homeUiState = MutableStateFlow(SpendState())
     val homeUiState : StateFlow<SpendState> = _homeUiState
