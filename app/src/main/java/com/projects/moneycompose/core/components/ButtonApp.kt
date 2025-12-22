@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view.core.components
+package com.projects.moneycompose.core.components
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -6,9 +6,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun ButtonCompose(
+fun ButtonApp(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     colors: ButtonColors = ButtonDefaults.buttonColors(
@@ -30,9 +31,19 @@ fun ButtonCompose(
         colors = colors,
         enabled = isEnabledButton
     ) {
-        TextCompose(
+        TextApp(
             text = text,
             color = color
         )
     }
+}
+
+@Preview
+@Composable
+fun ButtonPreview() {
+    ButtonApp(
+        onClick = {},
+        text = "BUTTON",
+        isEnabledButton = true
+    )
 }

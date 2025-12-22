@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view.core.util
+package com.projects.moneycompose.core.util
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson

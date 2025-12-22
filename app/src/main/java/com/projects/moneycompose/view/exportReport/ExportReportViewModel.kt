@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view
+package com.projects.moneycompose.view.exportReport
 
 import android.content.ContentValues
 import android.content.Context
@@ -14,119 +14,24 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.projects.moneycompose.core.navigation.Screens
 import com.projects.moneycompose.domain.entity.ExportEntity
-import com.projects.moneycompose.domain.entity.MonthEntity
-import com.projects.moneycompose.domain.entity.SpentEntity
 import com.projects.moneycompose.domain.use_case.MoneyUseCases
-import com.projects.moneycompose.view.core.navigation.Screens
-import com.projects.moneycompose.view.core.util.MoneyEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-@HiltViewModel(assistedFactory = BaseViewModel.Factory::class)
-class BaseViewModel @AssistedInject constructor(
+@HiltViewModel(assistedFactory = ExportReportViewModel.Factory::class)
+class ExportReportViewModel @AssistedInject constructor(
     @Assisted val navKey: Screens,
     private val moneyUseCases: MoneyUseCases
-): ViewModel() {
+) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(navKey: Screens): BaseViewModel
-    }
-
-    private val _homeUiState = MutableStateFlow(SpendState())
-    val homeUiState : StateFlow<SpendState> = _homeUiState
-
-    private var getSpend: Job? = null
-    private var recentlyDeletedNote: SpentEntity? = null
-
-    private val _sumTot = MutableStateFlow("")
-    val sumTot : StateFlow<String> = _sumTot
-
-    init {
-        getSpends()
-        getListMonth()
-    }
-
-    private val _uiHistoryState = MutableStateFlow(HistoryState())
-    val uiHistoryState: StateFlow<HistoryState> = _uiHistoryState
-
-    private var getMonth: Job? = null
-
-
-    fun sumTot(spends: List<SpentEntity>) {
-        val tot = spends.sumOf { it.money }
-        _sumTot.value = tot.toString()
-    }
-
-    fun getListMonth() {
-        getMonth?.cancel()
-        getMonth = moneyUseCases.getMonthSaving()
-            .onEach { month ->
-                _uiHistoryState.value = uiHistoryState.value.copy(
-                    history = month
-                )
-            }
-            .launchIn(viewModelScope)
-    }
-
-
-    fun getSpends() {
-        getSpend?.cancel()
-        getSpend = moneyUseCases.getSpend()
-            .onEach { spend ->
-                _homeUiState.value = homeUiState.value.copy(
-                    spends = spend
-                )
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun onEvent(event: MoneyEvent){
-        when(event){
-            is MoneyEvent.AddSpent -> {
-                viewModelScope.launch {
-                    moneyUseCases.insertSpend(event.spentEntity)
-                }
-            }
-            is MoneyEvent.DeleteSpent -> {
-                viewModelScope.launch {
-                    moneyUseCases.deleteSpend(event.spentEntity)
-                    recentlyDeletedNote = event.spentEntity
-
-                }
-            }
-            is MoneyEvent.EditSpent -> {
-                viewModelScope.launch {
-                    moneyUseCases.updateSpend(event.spentEntity)
-                }
-            }
-            is MoneyEvent.AddMonth -> {
-                viewModelScope.launch {
-                    moneyUseCases.insertMonthSaving(event.monthEntity)
-                }
-            }
-
-            is MoneyEvent.DeleteAllSpend -> {
-                viewModelScope.launch {
-                    moneyUseCases.deleteAllSpend()
-                }
-            }
-
-            is MoneyEvent.AddReportPDF -> {
-                viewModelScope.launch {
-                    moneyUseCases.insertReportPDF(event.exportEntity)
-                }
-            }
-        }
+        fun create(navKey: Screens): ExportReportViewModel
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -157,13 +62,11 @@ class BaseViewModel @AssistedInject constructor(
         val paint = Paint()
         var y = 40
 
-        // ---- Título Principal ----
         paint.color = Color.BLACK
         paint.textSize = 18f
         paint.typeface = Typeface.DEFAULT_BOLD
         canvas.drawText("Reporte de Gastos", 80f, y.toFloat(), paint)
 
-        // ---- Subtítulos ----
         paint.textSize = 14f
         paint.typeface = Typeface.DEFAULT_BOLD
         y += 30
@@ -175,16 +78,14 @@ class BaseViewModel @AssistedInject constructor(
         y += 25
         canvas.drawText("Gastos:", 40f, y.toFloat(), paint)
 
-        // ---- Lista de gastos enumerada ----
         paint.textSize = 12f
         paint.typeface = Typeface.DEFAULT
         var index = 1
         exportEntity.listSpent.forEach { item ->
             y += 20
 
-            // Si el texto se sale de la página, crear nueva
             if (y > pageHeight - 40) {
-                pdfDocument.finishPage(page) // cerrar la actual
+                pdfDocument.finishPage(page)
                 pageNumber++
                 val (newPg, newCanvas) = newPage()
                 page = newPg
@@ -203,7 +104,8 @@ class BaseViewModel @AssistedInject constructor(
 
         pdfDocument.finishPage(page)
 
-        val fileName = "REPORTE DE GASTOS: ${exportEntity.monthReport}-${exportEntity.yearReport}.pdf"
+        val fileName =
+            "REPORTE DE GASTOS: ${exportEntity.monthReport}-${exportEntity.yearReport}.pdf"
         savePdfToDownloads(context, fileName, pdfDocument)
 
         pdfDocument.close()
@@ -229,11 +131,3 @@ class BaseViewModel @AssistedInject constructor(
     }
 
 }
-
-data class SpendState(
-    val spends: List<SpentEntity> = emptyList()
-)
-
-data class HistoryState(
-    val history: List<MonthEntity> = emptyList()
-)

@@ -18,19 +18,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.projects.moneycompose.R
 import com.projects.moneycompose.domain.entity.MonthEntity
-import com.projects.moneycompose.view.core.components.TextCompose
-import com.projects.moneycompose.view.BaseViewModel
+import com.projects.moneycompose.core.components.TextApp
 import java.text.NumberFormat
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    historyViewModel: BaseViewModel,
+    historyViewModel: HistoryViewModel,
     innerPadding: PaddingValues
 ) {
     val uiState by historyViewModel.uiHistoryState.collectAsStateWithLifecycle()
@@ -42,7 +42,7 @@ fun HistoryScreen(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            TextCompose(
+            TextApp(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.title_screen_history),
                 textAlign = TextAlign.Center,
@@ -50,14 +50,19 @@ fun HistoryScreen(
             )
         }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp)
-        ) {
-            items(uiState.history) { historySpent ->
-                ItemHistory(historySpent)
-            }
+        ListItemsHistory(innerPadding = innerPadding, uiState)
+    }
+}
+
+@Composable
+fun ListItemsHistory(innerPadding: PaddingValues, uiState: HistoryState){
+    LazyColumn(
+        modifier = Modifier
+            .padding(innerPadding)
+            .padding(horizontal = 16.dp)
+    ) {
+        items(uiState.history) { historySpent ->
+            ItemHistory(historySpent)
         }
     }
 }
@@ -84,9 +89,15 @@ fun ItemHistory(itemMonth: MonthEntity) {
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            TextCompose(text = itemMonth.month)
-            TextCompose(text = itemMonth.year)
+            TextApp(text = itemMonth.month)
+            TextApp(text = itemMonth.year)
         }
-        TextCompose(text = "S/. $formattedValue")
+        TextApp(text = "S/. $formattedValue")
     }
+}
+
+@Preview
+@Composable
+fun HistoryScreenPreview(){
+    ListItemsHistory(innerPadding = PaddingValues(12.dp), uiState = HistoryState())
 }

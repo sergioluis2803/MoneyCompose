@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view.core.util
+package com.projects.moneycompose.core.util
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add

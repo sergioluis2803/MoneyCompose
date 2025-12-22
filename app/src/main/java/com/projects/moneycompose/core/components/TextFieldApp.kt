@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view.core.components
+package com.projects.moneycompose.core.components
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -7,9 +7,10 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun TextFieldCompose(
+fun TextFieldApp(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -37,5 +38,14 @@ fun TextFieldCompose(
         label = label,
         trailingIcon = trailingIcon,
         keyboardOptions = keyboardOptions
+    )
+}
+
+@Preview
+@Composable
+fun TextFieldPreview() {
+    TextFieldApp(
+        value = "",
+        onValueChange = {},
     )
 }

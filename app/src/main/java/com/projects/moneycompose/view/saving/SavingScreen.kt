@@ -19,13 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.projects.moneycompose.R
 import com.projects.moneycompose.data.data_source.DataStoreManager
-import com.projects.moneycompose.view.core.components.ButtonCompose
-import com.projects.moneycompose.view.core.components.TextCompose
-import com.projects.moneycompose.view.core.components.TextFieldCompose
+import com.projects.moneycompose.core.components.ButtonApp
+import com.projects.moneycompose.core.components.TextApp
+import com.projects.moneycompose.core.components.TextFieldApp
+import com.projects.moneycompose.ui.theme.MoneyComposeTheme
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -58,11 +60,11 @@ fun SavingScreen(
             .padding(innerPadding)
             .padding(horizontal = 14.dp)
     ) {
-        TextCompose(
+        TextApp(
             text = stringResource(R.string.title_screen_saving)
         )
 
-        TextFieldCompose(
+        TextFieldApp(
             value = formattedValue,
             onValueChange = {},
             modifier = Modifier.fillMaxWidth(),
@@ -71,9 +73,9 @@ fun SavingScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        TextCompose(text = stringResource(R.string.title_top_bar_saving))
+        TextApp(text = stringResource(R.string.title_top_bar_saving))
 
-        TextFieldCompose(
+        TextFieldApp(
             value = tfIn,
             onValueChange = { tfIn = it },
             modifier = Modifier.fillMaxWidth(),
@@ -82,7 +84,7 @@ fun SavingScreen(
 
         Spacer(Modifier.weight(1f))
 
-        ButtonCompose(
+        ButtonApp(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 scope.launch {
@@ -106,4 +108,12 @@ fun SavingScreen(
         )
     }
 
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SavingScreenPreview(){
+    MoneyComposeTheme {
+        SavingScreen(innerPadding = PaddingValues(12.dp))
+    }
 }

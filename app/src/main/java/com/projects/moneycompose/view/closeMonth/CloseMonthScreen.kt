@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,14 +27,12 @@ import com.projects.moneycompose.R
 import com.projects.moneycompose.domain.entity.ExportEntity
 import com.projects.moneycompose.domain.entity.ItemReport
 import com.projects.moneycompose.domain.entity.MonthEntity
-import com.projects.moneycompose.view.core.components.ButtonCompose
-import com.projects.moneycompose.view.core.components.TextCompose
+import com.projects.moneycompose.core.components.ButtonApp
+import com.projects.moneycompose.core.components.TextApp
 import com.projects.moneycompose.data.data_source.DataStoreManager
-import com.projects.moneycompose.view.core.util.MoneyEvent
-import com.projects.moneycompose.view.BaseViewModel
+import com.projects.moneycompose.core.util.MoneyEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
 import java.time.LocalDate
 import java.util.Locale
 
@@ -41,10 +40,15 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CloseMonthScreen(
-    closeMonthViewModel: BaseViewModel,
+    closeMonthViewModel: CloseMonthViewModel,
     onNavigateBack: () -> Unit,
     innerPadding: PaddingValues
 ) {
+
+    LaunchedEffect(Unit) {
+        closeMonthViewModel.getSpends()
+    }
+
     val listSpent by closeMonthViewModel.homeUiState.collectAsStateWithLifecycle()
     val currentDate = LocalDate.now()
     val year = currentDate.year
@@ -60,19 +64,16 @@ fun CloseMonthScreen(
     val savedIngreso by dataStore.deposit.collectAsStateWithLifecycle(initialValue = "")
     val scope = rememberCoroutineScope()
 
-    val sumSpentMonth by closeMonthViewModel.sumTot.collectAsStateWithLifecycle()
-
-    val numberFormat = remember {
-        NumberFormat.getNumberInstance(Locale.US).apply {
-            minimumFractionDigits = 2
-            maximumFractionDigits = 2
-        }
+    var result = 0.0
+    var isActiveCloseMonth = false
+    var total = ""
+    if (listSpent.spends.isEmpty()) {
+        total = "Sin gastos registrados "
+    } else {
+        result = listSpent.spends.sumOf { it.money }
+        total = "S/. $result"
+        isActiveCloseMonth = true
     }
-    val formattedValue = remember(sumSpentMonth) {
-        sumSpentMonth.toDoubleOrNull()?.let { numberFormat.format(it) } ?: ""
-    }
-    val total =
-        if (formattedValue.isEmpty()) "Sin gastos registrados" else "S/. $formattedValue"
 
     Column(
         modifier = Modifier
@@ -80,7 +81,7 @@ fun CloseMonthScreen(
             .padding(innerPadding)
             .padding(horizontal = 14.dp)
     ) {
-        TextCompose(
+        TextApp(
             text = stringResource(R.string.title_screen_month),
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp
@@ -88,13 +89,13 @@ fun CloseMonthScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        TextCompose(
+        TextApp(
             text = stringResource(R.string.body_screen_month)
         )
 
         Spacer(Modifier.height(16.dp))
 
-        TextCompose(
+        TextApp(
             text = stringResource(R.string.footer_screen_month),
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
@@ -102,25 +103,23 @@ fun CloseMonthScreen(
 
         Spacer(Modifier.height(12.dp))
 
-        TextCompose(text = total)
+        TextApp(text = total)
 
         Spacer(Modifier.weight(1f))
 
-        ButtonCompose(
+        ButtonApp(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                if(savedIngreso.isEmpty()){
+                if (savedIngreso.isEmpty()) {
                     Toast.makeText(context, "No hay un ingreso registrado", Toast.LENGTH_SHORT)
-                    .show()
+                        .show()
                 } else {
                     scope.launch {
-                        closeMonthViewModel.getSpends()
-
-                        val saving = savedIngreso.toDouble() - sumSpentMonth.toDouble()
+                        val saving = savedIngreso.toDouble() - result
                         val monthEntity = MonthEntity(
                             year = year.toString(),
                             month = formattedMonth,
-                            spent = sumSpentMonth,
+                            spent = result.toString(),
                             saving = saving.toString()
                         )
 
@@ -153,7 +152,7 @@ fun CloseMonthScreen(
                 }
             },
             text = stringResource(R.string.title_top_bar_screen_month),
-            isEnabledButton = formattedValue.isNotEmpty()
+            isEnabledButton = isActiveCloseMonth
         )
     }
 

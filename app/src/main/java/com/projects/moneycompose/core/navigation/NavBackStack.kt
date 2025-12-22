@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view.core.navigation
+package com.projects.moneycompose.core.navigation
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey

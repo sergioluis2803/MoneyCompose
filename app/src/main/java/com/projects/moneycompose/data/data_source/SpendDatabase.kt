@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.projects.moneycompose.domain.entity.ExportEntity
 import com.projects.moneycompose.domain.entity.MonthEntity
 import com.projects.moneycompose.domain.entity.SpentEntity
-import com.projects.moneycompose.view.core.util.Converters
+import com.projects.moneycompose.core.util.Converters
 
 @Database(
     entities = [SpentEntity::class, MonthEntity::class, ExportEntity::class],

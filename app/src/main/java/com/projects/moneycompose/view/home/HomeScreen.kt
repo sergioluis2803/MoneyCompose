@@ -1,6 +1,8 @@
 package com.projects.moneycompose.view.home
 
-import android.widget.Toast
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,171 +25,74 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.projects.moneycompose.R
 import com.projects.moneycompose.domain.entity.SpentEntity
-import com.projects.moneycompose.view.BaseViewModel
-import com.projects.moneycompose.view.core.components.TextCompose
-import com.projects.moneycompose.view.core.dialog.DialogAddSpend
-import com.projects.moneycompose.view.core.dialog.DialogDate
-import com.projects.moneycompose.view.core.util.MoneyEvent
+import com.projects.moneycompose.core.components.TextApp
+import com.projects.moneycompose.core.dialog.DialogAddSpend
+import com.projects.moneycompose.core.dialog.DialogDate
+import com.projects.moneycompose.ui.theme.MoneyComposeTheme
 import java.text.NumberFormat
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    baseViewModel: BaseViewModel,
+    homeViewModel: HomeViewModel,
     innerPadding: PaddingValues,
     showDialog: Boolean,
     onDismissDialog: () -> Unit
 ) {
-    val uiState by baseViewModel.homeUiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    var showDialogCalendar by remember { mutableStateOf(false) }
-    var descriptionSpent by remember { mutableStateOf("") }
-    var dateSpent by remember { mutableStateOf("") }
-    var priceSpent by remember { mutableStateOf("") }
-    var descriptionUpdateSpent by remember { mutableStateOf("") }
-    var dateUpdateSpent by remember { mutableStateOf("") }
-    var priceUpdateSpent by remember { mutableStateOf("") }
-    var isUpdateSpent by remember { mutableStateOf(false) }
-    var idSpent by remember { mutableStateOf(0) }
+    val state by homeViewModel.uiState.collectAsStateWithLifecycle()
 
-    if (isUpdateSpent) {
-        DialogAddSpend(
-            showDialog = true,
-            onDismissDialog = {
-                isUpdateSpent = false
-            },
-            onSaveSpent = {
-                if (descriptionUpdateSpent.isNotEmpty() && dateUpdateSpent.isNotEmpty() && priceUpdateSpent.isNotEmpty()) {
-                    baseViewModel.onEvent(
-                        MoneyEvent.EditSpent(
-                            SpentEntity(
-                                id = idSpent,
-                                description = descriptionUpdateSpent,
-                                date = dateUpdateSpent,
-                                money = priceUpdateSpent.toDouble()
-                            )
-                        )
-                    )
-                }
-                isUpdateSpent = false
-            },
-            descriptionSpent = descriptionUpdateSpent,
-            onChangeDescription = {
-                descriptionUpdateSpent = it
-            },
-            dateSpent = dateUpdateSpent,
-            onChangeDate = { dateUpdateSpent = it },
-            priceSpent = priceUpdateSpent,
-            onChangePrice = { priceUpdateSpent = it },
-            onShowCalendar = { showDialogCalendar = true }
-        )
+    LaunchedEffect(showDialog) {
+        if (showDialog) {
+            homeViewModel.onEvent(HomeUiEvent.OnAddClick)
+            onDismissDialog()
+        }
     }
 
-    DialogAddSpend(
-        showDialog = showDialog,
-        onDismissDialog = {
-            onDismissDialog()
-            descriptionSpent = ""
-            dateSpent = ""
-            priceSpent = ""
-        },
-        onSaveSpent = {
-            if (descriptionSpent.isNotEmpty() && dateSpent.isNotEmpty() && priceSpent.isNotEmpty()) {
-                baseViewModel.onEvent(
-                    MoneyEvent.AddSpent(
-                        SpentEntity(
-                            description = descriptionSpent,
-                            date = dateSpent,
-                            money = priceSpent.toDouble()
-                        )
-                    )
-                )
-            }
-            descriptionSpent = ""
-            dateSpent = ""
-            priceSpent = ""
-            onDismissDialog()
-        },
-        descriptionSpent = descriptionSpent,
-        onChangeDescription = {
-            descriptionSpent = it
-        },
-        dateSpent = dateSpent,
-        onChangeDate = { dateSpent = it },
-        priceSpent = priceSpent,
-        onChangePrice = { priceSpent = it },
-        onShowCalendar = { showDialogCalendar = true }
+    HomeContent(
+        state = state,
+        innerPadding = innerPadding,
+        onEvent = homeViewModel::onEvent
     )
+}
 
-    DialogDate(
-        showDateDialog = showDialogCalendar,
-        onDismissDialog = { showDialogCalendar = false },
-        onSelectedDate = { date ->
-            if (isUpdateSpent) dateUpdateSpent = date else dateSpent = date
-            showDialogCalendar = false
-        }
-    )
-
-    if (uiState.spends.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            TextCompose(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.title_screen_home_empty_spent),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Light
-            )
-        }
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun HomeContent(
+    state: HomeUiState,
+    innerPadding: PaddingValues,
+    onEvent: (HomeUiEvent) -> Unit
+) {
+    if (state.spends.isEmpty()) {
+        ScreenEmpty(innerPadding)
     } else {
         LazyColumn(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp)
+                .padding(top = 16.dp)
                 .padding(innerPadding)
         ) {
-            baseViewModel.sumTot(uiState.spends)
-            items(uiState.spends) { itemSpent ->
+            items(state.spends) { itemSpent ->
                 ItemSpent(
                     itemSpent = itemSpent,
-                    onEditSpent = {
-                        isUpdateSpent = true
-                        idSpent = itemSpent.id
-                        descriptionUpdateSpent = itemSpent.description
-                        dateUpdateSpent = itemSpent.date
-                        priceUpdateSpent = itemSpent.money.toString()
-                    },
+                    onEditSpent = { onEvent(HomeUiEvent.OnEditClick(itemSpent)) },
                     onDeleteSpent = {
-                        baseViewModel.onEvent(
-                            MoneyEvent.DeleteSpent(
-                                SpentEntity(
-                                    id = itemSpent.id,
-                                    description = itemSpent.description,
-                                    date = itemSpent.date,
-                                    money = itemSpent.money
-                                )
-                            )
-                        )
-                        Toast.makeText(context, "GASTO ELIMINADO", Toast.LENGTH_SHORT)
-                            .show()
+                        onEvent(HomeUiEvent.OnDeleteSpent(itemSpent))
                     }
                 )
             }
@@ -208,6 +113,79 @@ fun HomeScreen(
             }
         }
     }
+
+    SpendDialog(
+        state = state.dialogState,
+        onDismiss = {
+            onEvent(HomeUiEvent.OnDismissDialog)
+        },
+        onDescriptionChange = {
+            onEvent(HomeUiEvent.OnDescriptionChange(it))
+        },
+        onDateChange = {
+            onEvent(HomeUiEvent.OnDateChange(it))
+        },
+        onPriceChange = {
+            onEvent(HomeUiEvent.OnPriceChange(it))
+        },
+        onSave = {
+            Log.d("PRUEBA", "1")
+            onEvent(HomeUiEvent.OnSaveSpent)
+        },
+        onEvent = onEvent
+    )
+
+    DialogDate(
+        showDateDialog = state.isDateDialogVisible,
+        onDismissDialog = {
+            onEvent(HomeUiEvent.OnDismissDateDialog)
+        },
+        onSelectedDate = { date ->
+            onEvent(HomeUiEvent.OnDateSelected(date))
+        }
+    )
+}
+
+@Composable
+fun SpendDialog(
+    state: SpendDialogState,
+    onDismiss: () -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onDateChange: (String) -> Unit,
+    onPriceChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onEvent: (HomeUiEvent) -> Unit
+) {
+    if (!state.isVisible) return
+
+    DialogAddSpend(
+        onDismissDialog = onDismiss,
+        descriptionSpent = state.form.description,
+        dateSpent = state.form.date,
+        priceSpent = state.form.price,
+        onChangeDescription = onDescriptionChange,
+        onChangeDate = onDateChange,
+        onChangePrice = onPriceChange,
+        onSaveSpent = onSave,
+        onShowCalendar = { onEvent(HomeUiEvent.OnShowDateDialog) }
+    )
+}
+
+@Composable
+private fun ScreenEmpty(innerPadding: PaddingValues) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        contentAlignment = Alignment.Center
+    ) {
+        TextApp(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.title_screen_home_empty_spent),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Light
+        )
+    }
 }
 
 @Composable
@@ -223,10 +201,6 @@ fun ItemSpent(
         }
     }
 
-    val formattedValue = remember(itemSpent.money) {
-        itemSpent.money.let { numberFormat.format(it) } ?: ""
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -234,42 +208,64 @@ fun ItemSpent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            TextCompose(text = itemSpent.description)
-            TextCompose(text = itemSpent.date)
+            TextApp(text = itemSpent.description)
+            TextApp(text = itemSpent.date)
         }
-        TextCompose(
-            text = "S/.$formattedValue",
+        TextApp(
+            text = "S/.${numberFormat.format(itemSpent.money)}",
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 16.dp),
             textAlign = TextAlign.End
         )
-        Row {
-            IconButton(
-                onClick = { onEditSpent() },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "edit_spent",
-                    tint = MaterialTheme.colorScheme.secondary
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            IconButton(
-                onClick = { onDeleteSpent() },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "delete_spent",
-                    tint = MaterialTheme.colorScheme.secondary
-                )
-            }
+
+        IconButton(
+            onClick = { onEditSpent() },
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "edit_spent",
+                tint = MaterialTheme.colorScheme.secondary
+            )
         }
+        Spacer(Modifier.width(12.dp))
+        IconButton(
+            onClick = { onDeleteSpent() },
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "delete_spent",
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun HomeContentPreview() {
+    MoneyComposeTheme {
+        HomeContent(
+            state = HomeUiState(
+                spends = listOf(
+                    SpentEntity(id = 1, description = "Comida", date = "12/10/2024", money = 25.50),
+                    SpentEntity(
+                        id = 2,
+                        description = "Transporte",
+                        date = "13/10/2024",
+                        money = 10.00
+                    )
+                )
+            ),
+            innerPadding = PaddingValues(0.dp),
+            onEvent = {}
+        )
     }
 }
