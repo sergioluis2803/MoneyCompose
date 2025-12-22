@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view.core.util
+package com.projects.moneycompose.core.util
 
 import com.projects.moneycompose.domain.entity.ExportEntity
 import com.projects.moneycompose.domain.entity.MonthEntity

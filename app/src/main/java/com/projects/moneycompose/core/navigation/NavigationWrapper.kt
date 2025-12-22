@@ -1,4 +1,4 @@
-package com.projects.moneycompose.view.core.navigation
+package com.projects.moneycompose.core.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -44,14 +45,19 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.projects.moneycompose.R
-import com.projects.moneycompose.view.BaseViewModel
+import com.projects.moneycompose.view.home.HomeViewModel
 import com.projects.moneycompose.view.closeMonth.CloseMonthScreen
-import com.projects.moneycompose.view.core.components.TextCompose
-import com.projects.moneycompose.view.core.util.DrawerItem
-import com.projects.moneycompose.view.core.util.listDrawerItem
+import com.projects.moneycompose.core.components.TextApp
+import com.projects.moneycompose.core.util.DrawerItem
+import com.projects.moneycompose.core.util.listDrawerItem
+import com.projects.moneycompose.view.closeMonth.CloseMonthViewModel
 import com.projects.moneycompose.view.exportReport.ExportReportScreen
+import com.projects.moneycompose.view.exportReport.ExportReportViewModel
 import com.projects.moneycompose.view.history.HistoryScreen
+import com.projects.moneycompose.view.history.HistoryViewModel
 import com.projects.moneycompose.view.home.HomeScreen
+import com.projects.moneycompose.core.util.navKeyViewModel
+import com.projects.moneycompose.ui.theme.MoneyComposeTheme
 import com.projects.moneycompose.view.saving.SavingScreen
 import kotlinx.coroutines.launch
 
@@ -132,14 +138,10 @@ fun NavigationGraph(
         ),
         entryProvider = entryProvider {
             entry<Screens.Home> { key ->
-                val homeViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
-                    creationCallback = { factory ->
-                        factory.create(key)
-                    }
-                )
+                val homeViewModel: HomeViewModel = navKeyViewModel(key)
 
                 HomeScreen(
-                    baseViewModel = homeViewModel,
+                    homeViewModel = homeViewModel,
                     innerPadding = innerPadding,
                     showDialog = showDialog,
                     onDismissDialog = onDismissDialog
@@ -151,7 +153,7 @@ fun NavigationGraph(
             }
 
             entry<Screens.CloseMonth> { key ->
-                val closeMonthViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
+                val closeMonthViewModel = hiltViewModel<CloseMonthViewModel, CloseMonthViewModel.Factory>(
                     creationCallback = { factory ->
                         factory.create(key)
                     }
@@ -166,7 +168,7 @@ fun NavigationGraph(
             }
 
             entry<Screens.History> { key ->
-                val historyViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
+                val historyViewModel = hiltViewModel<HistoryViewModel, HistoryViewModel.Factory>(
                     creationCallback = { factory ->
                         factory.create(key)
                     }
@@ -179,7 +181,7 @@ fun NavigationGraph(
             }
 
             entry<Screens.ExportReport> { key ->
-                val exportReportViewModel = hiltViewModel<BaseViewModel, BaseViewModel.Factory>(
+                val exportReportViewModel = hiltViewModel<ExportReportViewModel, ExportReportViewModel.Factory>(
                     creationCallback = { factory ->
                         factory.create(key)
                     }
@@ -206,7 +208,7 @@ private fun DrawerContent(
     ) {
         Spacer(Modifier.height(14.dp))
 
-        TextCompose(
+        TextApp(
             text = stringResource(R.string.title_drawer),
             modifier = Modifier.padding(start = 18.dp)
         )
@@ -215,7 +217,7 @@ private fun DrawerContent(
 
         items.forEachIndexed { index, item ->
             NavigationDrawerItem(
-                label = { TextCompose(text = item.name) },
+                label = { TextApp(text = item.name) },
                 icon = { Icon(item.icon, contentDescription = null) },
                 selected = index == selectedIndex,
                 onClick = { onItemSelected(index) },
@@ -237,7 +239,7 @@ private fun DrawerContent(
 private fun TopBar(onMenuClick: () -> Unit) {
     TopAppBar(
         title = {
-            TextCompose(
+            TextApp(
                 text = stringResource(R.string.title_top_bar_home),
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 18.sp
@@ -254,4 +256,13 @@ private fun TopBar(onMenuClick: () -> Unit) {
             navigationIconContentColor = MaterialTheme.colorScheme.secondary
         )
     )
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun NavigationWrapperPreview(){
+    MoneyComposeTheme {
+        NavigationWrapper()
+    }
 }

@@ -8,7 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.projects.moneycompose.ui.theme.MoneyComposeTheme
-import com.projects.moneycompose.view.core.navigation.NavigationWrapper
+import com.projects.moneycompose.core.navigation.NavigationWrapper
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

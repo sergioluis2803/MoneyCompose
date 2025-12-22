@@ -34,9 +34,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projects.moneycompose.R
-import com.projects.moneycompose.view.core.components.ButtonCompose
-import com.projects.moneycompose.view.core.components.TextCompose
-import com.projects.moneycompose.view.BaseViewModel
+import com.projects.moneycompose.core.components.ButtonApp
+import com.projects.moneycompose.core.components.TextApp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -45,7 +44,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportReportScreen(
-    exportViewModel: BaseViewModel,
+    exportViewModel: ExportReportViewModel,
     innerPadding: PaddingValues
 ) {
     val context = LocalContext.current
@@ -57,7 +56,7 @@ fun ExportReportScreen(
             .padding(innerPadding)
             .padding(horizontal = 16.dp)
     ) {
-        TextCompose(
+        TextApp(
             text = stringResource(R.string.title_screen_export_report),
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp
@@ -72,7 +71,7 @@ fun ExportReportScreen(
         )
         Spacer(Modifier.height(12.dp))
 
-        TextCompose(
+        TextApp(
             text = stringResource(R.string.body_screen_export_report),
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp
@@ -83,7 +82,7 @@ fun ExportReportScreen(
 
         Spacer(Modifier.weight(1f))
 
-        ButtonCompose(
+        ButtonApp(
             modifier = Modifier.fillMaxWidth(),
             onClick = { exportViewModel.generatePDF(context, selectedMonth, selectedYear) },
             text = stringResource(R.string.title_top_bar_export_report),
@@ -104,10 +103,10 @@ fun ItemReport() {
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            TextCompose(text = stringResource(R.string.footer_screen_export_report))
-            TextCompose(text = stringResource(R.string.item_screen_export_report))
+            TextApp(text = stringResource(R.string.footer_screen_export_report))
+            TextApp(text = stringResource(R.string.item_screen_export_report))
         }
-        TextCompose(text = stringResource(R.string.item_screen_export_report))
+        TextApp(text = stringResource(R.string.item_screen_export_report))
     }
 }
 
@@ -186,7 +185,7 @@ fun WheelPicker(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                TextCompose(
+                TextApp(
                     text = item,
                     fontSize = if (isSelected) 20.sp else 16.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,

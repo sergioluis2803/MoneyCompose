@@ -1,5 +1,7 @@
-package com.projects.moneycompose.view.core.dialog
+package com.projects.moneycompose.core.dialog
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
@@ -10,13 +12,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.projects.moneycompose.R
-import com.projects.moneycompose.view.core.components.TextCompose
-import java.text.SimpleDateFormat
+import com.projects.moneycompose.core.components.TextApp
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DialogDate(
@@ -38,9 +42,11 @@ fun DialogDate(
                     onClick = {
                         val millis = datePickerState.selectedDateMillis
                         if (millis != null) {
-                            val selectedDate = Date(millis)
-                            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            val formattedDate = formatter.format(selectedDate)
+                            val localDate = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+
+                            val formattedDate = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                             onSelectedDate(formattedDate)
                         }
                     },
@@ -49,7 +55,7 @@ fun DialogDate(
                         contentColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
-                    TextCompose(
+                    TextApp(
                         text = stringResource(R.string.button_dialog_date_confirm)
                     )
                 }
@@ -76,4 +82,15 @@ fun DialogDate(
             )
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview
+@Composable
+fun DialogDatePreview() {
+    DialogDate(
+        showDateDialog = true,
+        onDismissDialog = {},
+        onSelectedDate = {}
+    )
 }
